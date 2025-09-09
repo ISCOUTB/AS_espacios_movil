@@ -12,3 +12,6 @@ def create_reservation(student_id: str, place_id: str, start_hour: str, end_hour
 def read_reservation_route(id_user: str):
     return service.read_Reservation(id_user)
 
+@router.delete("/deleteReserv")
+def delete_reservation_route(id_user:str):
+    return service.delete_Reservation(id_user)

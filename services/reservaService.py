@@ -43,4 +43,23 @@ class ReservationService:
         self.cursor.execute("SELECT * FROM reserva WHERE id_user = %s", (id_user,))
         result = self.cursor.fetchall()
         return result
+    
+    def delete_Reservation(self, id_user: str):
 
+        self.cursor.execute("SELECT id_place FROM reserva WHERE id_user = %s", (id_user,))
+        reserva = self.cursor.fetchone()
+        if reserva is None:
+            self.cursor.close()
+            return {"error": "No existe una reserva asociada a este usuario"}
+
+        id_place = reserva["id_place"]
+
+        self.cursor.execute("UPDATE usuario SET tiene_reserva = FALSE WHERE id_user = %s", (id_user,))
+
+        self.cursor.execute("UPDATE espacio SET disponible = TRUE WHERE id_place = %s", (id_place,))
+
+        self.cursor.execute("DELETE FROM reserva WHERE id_user = %s", (id_user,))
+        self.conn.commit()
+        self.cursor.close()
+
+        return {"success": True, "message": f"Reserva eliminada y espacio {id_place} liberado"}
