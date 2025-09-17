@@ -8,7 +8,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 def get_user():
     return StudentService.get_users()
 
-@router.post("/create_user", response_model=UsuarioSchema)
+@router.post("/create_user")
 def create_user(cod:str, name:str, can_reserv:str):
     return StudentService.create_users(cod, name, can_reserv)
 
