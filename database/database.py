@@ -8,30 +8,48 @@ class APIClient:
         "Content-Type": "application/json"
     }
 
+    # sesión persistente
+    session = requests.Session()
+    session.headers.update(HEADERS)
+
+    @classmethod
+    def ensure_cookies(cls):
+        if not cls.session.cookies:
+            resp = cls.session.get(cls.BASE_URL + "student_table/")
+            resp.raise_for_status()
+
     @classmethod
     def get(cls, endpoint, params=None):
+        cls.ensure_cookies()
         url = cls.BASE_URL + endpoint
-        response = requests.get(url, headers=cls.HEADERS, params=params, timeout=15)
+        response = cls.session.get(url, params=params, timeout=15)
         response.raise_for_status()
         return response.json()
 
     @classmethod
     def post(cls, endpoint, payload: dict):
+        cls.ensure_cookies()
         url = cls.BASE_URL + endpoint
-        response = requests.post(url, json=payload, headers=cls.HEADERS, timeout=15)
+        response = cls.session.post(url, json=payload, timeout=15)
         response.raise_for_status()
         return response.json()
 
     @classmethod
     def put(cls, endpoint, payload: dict):
+        cls.ensure_cookies()
         url = cls.BASE_URL + endpoint
-        response = requests.put(url, json=payload, headers=cls.HEADERS, timeout=15)
+        response = cls.session.put(url, json=payload, timeout=15)
         response.raise_for_status()
         return response.json()
 
     @classmethod
     def delete(cls, endpoint):
+        cls.ensure_cookies()
         url = cls.BASE_URL + endpoint
-        response = requests.delete(url, headers=cls.HEADERS, timeout=15)
-        response.raise_for_status()
-        return response.status_code
+        response = cls.session.delete(url, timeout=15)
+        if response.status_code == 204:
+            return {"success": "Usuario eliminado correctamente"}
+        elif response.status_code == 404:
+            return {"error": "Usuario no encontrado"}
+        else:
+            return {"error": f"Error {response.status_code}: {response.text}"}
